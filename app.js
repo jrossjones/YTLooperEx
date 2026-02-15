@@ -70,6 +70,11 @@
   const importBtn = document.getElementById('import-btn');
   const exportBtn = document.getElementById('export-btn');
   const importFileInput = document.getElementById('import-file-input');
+  const speedSlider = document.getElementById('speed-slider');
+  const speedDecrementBtn = document.getElementById('speed-decrement-btn');
+  const speedIncrementBtn = document.getElementById('speed-increment-btn');
+  const speedValueDisplay = document.getElementById('speed-value-display');
+  const speedSliderRow = document.getElementById('speed-slider-row');
   const shortcutsBtn = document.getElementById('shortcuts-btn');
   const shortcutsModal = document.getElementById('shortcuts-modal');
   const closeModalBtn = document.getElementById('close-modal-btn');
@@ -221,8 +226,11 @@
 
   function showControls() {
     controlsBar.style.display = '';
+    speedSliderRow.style.display = '';
     timelineSection.style.display = '';
     sectionsPanel.style.display = '';
+    addSectionBtn.disabled = false;
+    exportBtn.disabled = false;
   }
 
   // ---- Polling Loop ----
@@ -285,7 +293,7 @@
     speedButtonsContainer.innerHTML = '';
     availableRates.forEach(function (rate) {
       const btn = document.createElement('button');
-      btn.className = 'speed-btn' + (rate === currentRate ? ' active' : '');
+      btn.className = 'speed-btn' + (Math.abs(rate - currentRate) < 0.025 ? ' active' : '');
       btn.textContent = rate + 'x';
       btn.title = 'Speed ' + rate + 'x';
       btn.addEventListener('click', function () {
@@ -293,21 +301,35 @@
       });
       speedButtonsContainer.appendChild(btn);
     });
+    updateSpeedSlider();
   }
 
   function setSpeed(rate) {
-    if (!player || typeof player.setPlaybackRate !== 'function') return;
-    player.setPlaybackRate(rate);
+    if (player && typeof player.setPlaybackRate === 'function') {
+      player.setPlaybackRate(rate);
+    }
     currentRate = rate;
     highlightActiveSpeed();
+    updateSpeedSlider();
   }
 
   function highlightActiveSpeed() {
     var buttons = speedButtonsContainer.querySelectorAll('.speed-btn');
     buttons.forEach(function (btn) {
       var rate = parseFloat(btn.textContent);
-      btn.classList.toggle('active', rate === currentRate);
+      btn.classList.toggle('active', Math.abs(rate - currentRate) < 0.025);
     });
+  }
+
+  function updateSpeedSlider() {
+    speedSlider.value = currentRate;
+    speedValueDisplay.textContent = currentRate.toFixed(2) + 'x';
+  }
+
+  function changeSpeedFine(delta) {
+    var newRate = Math.round((currentRate + delta) * 100) / 100;
+    newRate = Math.max(0.25, Math.min(3.0, newRate));
+    setSpeed(newRate);
   }
 
   function changeSpeedStep(delta) {
@@ -342,8 +364,8 @@
   }
 
   function updateABLabels() {
-    aTimeDisplay.textContent = 'A: ' + formatTime(pointA);
-    bTimeDisplay.textContent = 'B: ' + formatTime(pointB);
+    aTimeDisplay.textContent = 'A: ' + formatTime(pointA, true);
+    bTimeDisplay.textContent = 'B: ' + formatTime(pointB, true);
   }
 
   function getPercentFromEvent(e, track) {
@@ -447,6 +469,20 @@
     loopToggleBtn.classList.toggle('active', loopEnabled);
   }
 
+  function nudgePoint(target, delta) {
+    if (target === 'a') {
+      var newA = pointA + delta;
+      newA = Math.max(0, Math.min(newA, pointB - 0.1));
+      pointA = Math.round(newA * 100) / 100;
+    } else if (target === 'b') {
+      var newB = pointB + delta;
+      newB = Math.max(pointA + 0.1, Math.min(newB, duration));
+      pointB = Math.round(newB * 100) / 100;
+    }
+    updateLoopRegion();
+    updateABLabels();
+  }
+
   // ---- Section Playlist ----
 
   function saveSections() {
@@ -467,6 +503,12 @@
     try {
       var data = localStorage.getItem(STORAGE_PREFIX + currentVideoId);
       sections = data ? JSON.parse(data) : [];
+      // Backward compat: ensure all sections have a speed field
+      sections.forEach(function (s) {
+        if (typeof s.speed !== 'number') {
+          s.speed = 1;
+        }
+      });
     } catch (e) {
       sections = [];
     }
@@ -479,7 +521,8 @@
       id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
       name: name || 'Section ' + (sections.length + 1),
       startTime: pointA,
-      endTime: pointB
+      endTime: pointB,
+      speed: currentRate
     };
     sections.push(section);
     saveSections();
@@ -512,6 +555,10 @@
     loopToggleBtn.classList.add('active');
     updateLoopRegion();
     updateABLabels();
+
+    // Restore saved speed (default to 1 for old sections without speed)
+    setSpeed(section.speed || 1);
+
     if (player && typeof player.seekTo === 'function') {
       player.seekTo(pointA, true);
       player.playVideo();
@@ -606,9 +653,15 @@
         deleteSection(section.id);
       });
 
+      // Speed badge
+      var speedBadge = document.createElement('span');
+      speedBadge.className = 'section-speed';
+      speedBadge.textContent = (section.speed || 1) + 'x';
+
       row.appendChild(dragHandle);
       row.appendChild(nameSpan);
       row.appendChild(timesSpan);
+      row.appendChild(speedBadge);
       row.appendChild(playBtn);
       row.appendChild(deleteBtn);
 
@@ -699,13 +752,16 @@
           urlError.textContent = 'Sections file contains invalid data.';
           return;
         }
-        // Ensure each imported section has a unique id
+        // Ensure each imported section has a unique id and speed
         data.sections.forEach(function (s) {
           if (!s.id) {
             s.id = 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
           }
+          if (typeof s.speed !== 'number') {
+            s.speed = 1;
+          }
         });
-        // If for the same video, merge. Otherwise replace.
+        // If for the same video, merge. Otherwise replace and auto-load video.
         if (data.videoId === currentVideoId) {
           // Merge: add sections that don't already exist (by matching name+times)
           data.sections.forEach(function (imported) {
@@ -718,15 +774,21 @@
               sections.push(imported);
             }
           });
+          saveSections();
+          renderSectionList();
         } else {
-          // Different video — load that video first if we can, then set sections
+          // Different video or no video loaded — save sections then load the video
           sections = data.sections;
           if (data.videoId) {
             currentVideoId = data.videoId;
+            saveSections();
+            urlInput.value = 'https://www.youtube.com/watch?v=' + data.videoId;
+            loadVideo(data.videoId);
+          } else {
+            saveSections();
+            renderSectionList();
           }
         }
-        saveSections();
-        renderSectionList();
         urlError.textContent = '';
       } catch (err) {
         urlError.textContent = 'Could not parse the sections file.';
@@ -814,15 +876,16 @@
 
   // ---- Utility ----
 
-  function formatTime(seconds) {
+  function formatTime(seconds, showDecimal) {
     if (!seconds || isNaN(seconds) || seconds < 0) seconds = 0;
     var hrs = Math.floor(seconds / 3600);
     var mins = Math.floor((seconds % 3600) / 60);
     var secs = Math.floor(seconds % 60);
+    var frac = showDecimal ? '.' + Math.floor((seconds % 1) * 10) : '';
     if (hrs > 0) {
-      return hrs + ':' + mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+      return hrs + ':' + mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0') + frac;
     }
-    return mins + ':' + secs.toString().padStart(2, '0');
+    return mins + ':' + secs.toString().padStart(2, '0') + frac;
   }
 
   function escapeHtml(str) {
@@ -834,10 +897,13 @@
   // ---- Event Listeners ----
 
   function init() {
-    // Initially hide controls until a video is loaded
+    // Initially hide player controls until a video is loaded
     controlsBar.style.display = 'none';
+    speedSliderRow.style.display = 'none';
     timelineSection.style.display = 'none';
-    sectionsPanel.style.display = 'none';
+    // Sections panel stays visible so Import is always accessible
+    addSectionBtn.disabled = true;
+    exportBtn.disabled = true;
 
     // Load YouTube API
     loadYouTubeAPI();
@@ -907,6 +973,35 @@
         cancelSectionBtn.click();
       }
     });
+
+    // Speed slider
+    speedSlider.addEventListener('input', function () {
+      var rate = parseFloat(speedSlider.value);
+      rate = Math.round(rate * 100) / 100;
+      setSpeed(rate);
+    });
+
+    speedDecrementBtn.addEventListener('click', function () {
+      changeSpeedFine(-0.05);
+    });
+
+    speedIncrementBtn.addEventListener('click', function () {
+      changeSpeedFine(0.05);
+    });
+
+    // Nudge buttons — event delegation on timeline controls
+    var timelineControls = document.querySelector('.timeline-controls');
+    if (timelineControls) {
+      timelineControls.addEventListener('click', function (e) {
+        var btn = e.target.closest('.nudge-btn');
+        if (!btn) return;
+        var target = btn.dataset.target;
+        var delta = parseFloat(btn.dataset.delta);
+        if (target && !isNaN(delta)) {
+          nudgePoint(target, delta);
+        }
+      });
+    }
 
     // Export / Import
     exportBtn.addEventListener('click', exportSections);

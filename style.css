@@ -272,6 +272,92 @@ body {
   font-weight: 600;
 }
 
+/* Speed Slider Row */
+
+.speed-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+}
+
+.speed-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--track-bg);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s;
+}
+
+.speed-slider::-webkit-slider-thumb:hover {
+  background: var(--accent-hover);
+}
+
+.speed-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+.speed-slider::-moz-range-track {
+  height: 6px;
+  background: var(--track-bg);
+  border-radius: 3px;
+  border: none;
+}
+
+.speed-fine-btn {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.speed-fine-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.speed-value-display {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.5em;
+  text-align: center;
+}
+
 /* ---- Timeline ---- */
 
 .timeline-section {
@@ -316,6 +402,32 @@ body {
 
 .reset-btn {
   color: var(--text-muted);
+}
+
+/* AB Nudge Buttons */
+
+.ab-nudge-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nudge-btn {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.nudge-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  background: var(--bg-elevated);
 }
 
 .ab-time {
@@ -443,6 +555,13 @@ body {
   border-color: var(--accent-hover);
 }
 
+.small-btn:disabled,
+.primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Add Section Form */
 
 .add-section-form {
@@ -557,6 +676,16 @@ body {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.section-speed {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding: 0.1rem 0.3rem;
+  background: var(--accent-dim);
+  border-radius: var(--radius-sm);
 }
 
 .section-play-btn,
@@ -729,5 +858,19 @@ kbd {
 
   .section-row {
     flex-wrap: wrap;
+  }
+
+  .speed-slider-row {
+    gap: 0.35rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .ab-nudge-group {
+    gap: 1px;
+  }
+
+  .nudge-btn {
+    padding: 0.15rem 0.25rem;
+    font-size: 0.7rem;
   }
 }
