@@ -8,7 +8,7 @@
   // ---- Constants ----
   const POLL_INTERVAL_MS = 100;
   const STORAGE_PREFIX = 'ytlooper_sections_';
-  const DEFAULT_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  const DEFAULT_SPEEDS = [0.7, 0.8, 0.9, 1, 1.1];
 
   // ---- State ----
   let player = null;
@@ -161,6 +161,7 @@
       events: {
         onReady: onPlayerReady,
         onStateChange: onPlayerStateChange,
+        onPlaybackRateChange: onPlaybackRateChange,
         onError: onPlayerError
       }
     });
@@ -168,16 +169,6 @@
 
   function onPlayerReady() {
     duration = player.getDuration();
-
-    // Get available playback rates
-    try {
-      const rates = player.getAvailablePlaybackRates();
-      if (rates && rates.length) {
-        availableRates = rates;
-      }
-    } catch (e) {
-      // Use defaults
-    }
 
     renderSpeedButtons();
     resetAB();
@@ -222,6 +213,12 @@
       150: 'The video owner does not allow embedded playback.'
     };
     urlError.textContent = errors[event.data] || 'An error occurred loading the video.';
+  }
+
+  function onPlaybackRateChange(event) {
+    currentRate = event.data;
+    highlightActiveSpeed();
+    updateSpeedSlider();
   }
 
   function showControls() {
@@ -307,8 +304,16 @@
   function setSpeed(rate) {
     if (player && typeof player.setPlaybackRate === 'function') {
       player.setPlaybackRate(rate);
+      // Read back actual rate in case YouTube snapped to a different value
+      var actualRate = player.getPlaybackRate();
+      if (actualRate) {
+        currentRate = actualRate;
+      } else {
+        currentRate = rate;
+      }
+    } else {
+      currentRate = rate;
     }
-    currentRate = rate;
     highlightActiveSpeed();
     updateSpeedSlider();
   }
@@ -354,6 +359,9 @@
   }
 
   function updateLoopRegion() {
+    if ((!duration || duration <= 0) && player && typeof player.getDuration === 'function') {
+      duration = player.getDuration();
+    }
     if (!duration || duration <= 0) return;
     var leftPct = (pointA / duration) * 100;
     var widthPct = ((pointB - pointA) / duration) * 100;
@@ -470,6 +478,15 @@
   }
 
   function nudgePoint(target, delta) {
+    // Ensure duration is available
+    if ((!duration || duration <= 0) && player && typeof player.getDuration === 'function') {
+      duration = player.getDuration();
+      if (duration > 0 && pointB <= 0) {
+        pointB = duration; // Also fix pointB if it wasn't set
+      }
+    }
+    if (!duration || duration <= 0) return;
+
     if (target === 'a') {
       var newA = pointA + delta;
       newA = Math.max(0, Math.min(newA, pointB - 0.1));
