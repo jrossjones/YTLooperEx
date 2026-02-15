@@ -61,6 +61,12 @@
       </div>
       <div class="controls-center">
         <div class="speed-buttons" id="speed-buttons"></div>
+        <div class="speed-slider-inline">
+          <button id="speed-decrement-btn" class="speed-fine-btn" title="Decrease speed by 0.05">&minus;</button>
+          <input type="range" id="speed-slider" class="speed-slider" min="0.25" max="3.0" step="0.05" value="1">
+          <button id="speed-increment-btn" class="speed-fine-btn" title="Increase speed by 0.05">+</button>
+          <span id="speed-value-display" class="speed-value-display">1.00x</span>
+        </div>
       </div>
       <div class="controls-right">
         <button id="loop-toggle-btn" class="control-btn loop-btn" title="Toggle loop (L)">
@@ -72,14 +78,6 @@
         </button>
       </div>
     </section>
-
-    <!-- Speed Slider -->
-    <div class="speed-slider-row" id="speed-slider-row">
-      <button id="speed-decrement-btn" class="speed-fine-btn" title="Decrease speed by 0.05">&minus;</button>
-      <input type="range" id="speed-slider" class="speed-slider" min="0.25" max="3.0" step="0.05" value="1">
-      <button id="speed-increment-btn" class="speed-fine-btn" title="Increase speed by 0.05">+</button>
-      <span id="speed-value-display" class="speed-value-display">1.00x</span>
-    </div>
 
     <!-- Timeline / AB Loop Selector -->
     <section class="timeline-section" id="timeline-section">
@@ -96,6 +94,7 @@
         </div>
         <div class="timeline-controls-center">
           <button id="reset-ab-btn" class="ab-btn reset-btn" title="Reset A/B (R key)">Reset</button>
+          <button id="zoom-btn" class="ab-btn zoom-btn" title="Zoom to loop region">Zoom</button>
         </div>
         <div class="timeline-controls-right">
           <div class="ab-nudge-group">
@@ -128,7 +127,7 @@
           <button id="add-section-btn" class="small-btn primary-btn">+ Add Section</button>
         </div>
       </div>
-      <div id="add-section-form" class="add-section-form" hidden>
+      <div id="add-section-form" class="add-section-form" style="display:none">
         <input type="text" id="section-name-input" placeholder="Section name...">
         <button id="save-section-btn" class="small-btn primary-btn">Save</button>
         <button id="cancel-section-btn" class="small-btn">Cancel</button>

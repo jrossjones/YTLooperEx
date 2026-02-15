@@ -35,6 +35,11 @@
   let availableRates = DEFAULT_SPEEDS;
   let currentRate = 1;
 
+  // Timeline zoom state
+  let zoomStart = 0;
+  let zoomEnd = 0;
+  let isZoomed = false;
+
   // ---- DOM References ----
   const urlInput = document.getElementById('url-input');
   const loadBtn = document.getElementById('load-btn');
@@ -74,8 +79,8 @@
   const speedDecrementBtn = document.getElementById('speed-decrement-btn');
   const speedIncrementBtn = document.getElementById('speed-increment-btn');
   const speedValueDisplay = document.getElementById('speed-value-display');
-  const speedSliderRow = document.getElementById('speed-slider-row');
   const restartLoopBtn = document.getElementById('restart-loop-btn');
+  const zoomBtn = document.getElementById('zoom-btn');
   const shortcutsBtn = document.getElementById('shortcuts-btn');
   const shortcutsModal = document.getElementById('shortcuts-modal');
   const closeModalBtn = document.getElementById('close-modal-btn');
@@ -119,6 +124,9 @@
     urlError.textContent = '';
     duration = 0;
     activeSectionId = null;
+    isZoomed = false;
+    zoomStart = 0;
+    zoomEnd = 0;
 
     // Update URL hash
     history.replaceState(null, '', '#' + videoId);
@@ -225,7 +233,6 @@
 
   function showControls() {
     controlsBar.style.display = '';
-    speedSliderRow.style.display = '';
     timelineSection.style.display = '';
     sectionsPanel.style.display = '';
     addSectionBtn.disabled = false;
@@ -363,8 +370,12 @@
   // ---- Timeline ----
 
   function updatePlayhead(currentTime) {
-    if (!duration || duration <= 0) return;
-    var pct = (currentTime / duration) * 100;
+    var viewStart = isZoomed ? zoomStart : 0;
+    var viewEnd = isZoomed ? zoomEnd : duration;
+    var viewDuration = viewEnd - viewStart;
+    if (!viewDuration || viewDuration <= 0) return;
+    var pct = ((currentTime - viewStart) / viewDuration) * 100;
+    pct = Math.max(0, Math.min(100, pct));
     playhead.style.left = pct + '%';
   }
 
@@ -373,12 +384,17 @@
       duration = player.getDuration();
     }
     if (!duration || duration <= 0) return;
-    var leftPct = (pointA / duration) * 100;
-    var widthPct = ((pointB - pointA) / duration) * 100;
+    var viewStart = isZoomed ? zoomStart : 0;
+    var viewEnd = isZoomed ? zoomEnd : duration;
+    var viewDuration = viewEnd - viewStart;
+    if (!viewDuration || viewDuration <= 0) return;
+    var leftPct = ((pointA - viewStart) / viewDuration) * 100;
+    var widthPct = ((pointB - pointA) / viewDuration) * 100;
+    leftPct = Math.max(0, leftPct);
     loopRegion.style.left = leftPct + '%';
-    loopRegion.style.width = widthPct + '%';
-    handleA.style.left = leftPct + '%';
-    handleB.style.left = ((pointB / duration) * 100) + '%';
+    loopRegion.style.width = Math.min(widthPct, 100 - leftPct) + '%';
+    handleA.style.left = Math.max(0, Math.min(100, leftPct)) + '%';
+    handleB.style.left = Math.max(0, Math.min(100, ((pointB - viewStart) / viewDuration) * 100)) + '%';
   }
 
   function updateABLabels() {
@@ -394,7 +410,9 @@
   }
 
   function percentToTime(pct) {
-    return (pct / 100) * duration;
+    var viewStart = isZoomed ? zoomStart : 0;
+    var viewEnd = isZoomed ? zoomEnd : duration;
+    return viewStart + (pct / 100) * (viewEnd - viewStart);
   }
 
   // Handle dragging
@@ -456,6 +474,34 @@
     });
   }
 
+  // ---- Timeline Zoom ----
+
+  function zoomToLoop() {
+    if (!duration || duration <= 0) return;
+    var loopLength = pointB - pointA;
+    var padding = loopLength * 0.15;
+    padding = Math.max(padding, 1);
+    zoomStart = Math.max(0, pointA - padding);
+    zoomEnd = Math.min(duration, pointB + padding);
+    isZoomed = true;
+    updateZoomButton();
+    updateLoopRegion();
+    updatePlayhead(player ? player.getCurrentTime() : 0);
+  }
+
+  function resetZoom() {
+    zoomStart = 0;
+    zoomEnd = duration || 0;
+    isZoomed = false;
+    updateZoomButton();
+    updateLoopRegion();
+    updatePlayhead(player ? player.getCurrentTime() : 0);
+  }
+
+  function updateZoomButton() {
+    zoomBtn.classList.toggle('active', isZoomed);
+  }
+
   // ---- AB Loop Logic ----
 
   function setPointA(time) {
@@ -481,6 +527,10 @@
   function resetAB() {
     pointA = 0;
     pointB = duration || 0;
+    isZoomed = false;
+    zoomStart = 0;
+    zoomEnd = duration || 0;
+    updateZoomButton();
     updateLoopRegion();
     updateABLabels();
   }
@@ -976,7 +1026,6 @@
   function init() {
     // Initially hide player controls until a video is loaded
     controlsBar.style.display = 'none';
-    speedSliderRow.style.display = 'none';
     timelineSection.style.display = 'none';
     // Sections panel stays visible so Import is always accessible
     addSectionBtn.disabled = true;
@@ -1024,9 +1073,18 @@
     initHandleDrag(handleB, 'b');
     initTrackClick();
 
+    // Timeline zoom
+    zoomBtn.addEventListener('click', function () {
+      if (isZoomed) {
+        resetZoom();
+      } else {
+        zoomToLoop();
+      }
+    });
+
     // Section playlist
     addSectionBtn.addEventListener('click', function () {
-      addSectionForm.hidden = false;
+      addSectionForm.style.display = 'flex';
       sectionNameInput.value = '';
       sectionNameInput.focus();
     });
@@ -1034,12 +1092,12 @@
     saveSectionBtn.addEventListener('click', function () {
       var name = sectionNameInput.value.trim();
       addSection(name);
-      addSectionForm.hidden = true;
+      addSectionForm.style.display = 'none';
       sectionNameInput.value = '';
     });
 
     cancelSectionBtn.addEventListener('click', function () {
-      addSectionForm.hidden = true;
+      addSectionForm.style.display = 'none';
       sectionNameInput.value = '';
     });
 
