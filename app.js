@@ -75,6 +75,7 @@
   const speedIncrementBtn = document.getElementById('speed-increment-btn');
   const speedValueDisplay = document.getElementById('speed-value-display');
   const speedSliderRow = document.getElementById('speed-slider-row');
+  const restartLoopBtn = document.getElementById('restart-loop-btn');
   const shortcutsBtn = document.getElementById('shortcuts-btn');
   const shortcutsModal = document.getElementById('shortcuts-modal');
   const closeModalBtn = document.getElementById('close-modal-btn');
@@ -219,6 +220,7 @@
     currentRate = event.data;
     highlightActiveSpeed();
     updateSpeedSlider();
+    if (activeSectionId) renderSectionList();
   }
 
   function showControls() {
@@ -274,6 +276,13 @@
     }
   }
 
+  function restartLoop() {
+    if (player && typeof player.seekTo === 'function') {
+      player.seekTo(pointA, true);
+      player.playVideo();
+    }
+  }
+
   function updatePlayPauseIcon() {
     if (isPlaying) {
       playIcon.style.display = 'none';
@@ -316,6 +325,7 @@
     }
     highlightActiveSpeed();
     updateSpeedSlider();
+    if (activeSectionId) renderSectionList();
   }
 
   function highlightActiveSpeed() {
@@ -420,6 +430,7 @@
         document.removeEventListener('mouseup', onEnd);
         document.removeEventListener('touchmove', onMove);
         document.removeEventListener('touchend', onEnd);
+        if (activeSectionId) renderSectionList();
       }
 
       document.addEventListener('mousemove', onMove);
@@ -454,6 +465,7 @@
     pointA = Math.max(0, Math.min(time, pointB - 0.1));
     updateLoopRegion();
     updateABLabels();
+    if (activeSectionId) renderSectionList();
   }
 
   function setPointB(time) {
@@ -463,6 +475,7 @@
     pointB = Math.max(pointA + 0.1, Math.min(time, duration));
     updateLoopRegion();
     updateABLabels();
+    if (activeSectionId) renderSectionList();
   }
 
   function resetAB() {
@@ -498,6 +511,26 @@
     }
     updateLoopRegion();
     updateABLabels();
+    if (activeSectionId) renderSectionList();
+  }
+
+  // ---- Section Dirty Detection ----
+
+  function isSectionDirty(section) {
+    var aTol = Math.abs(pointA - section.startTime) > 0.05;
+    var bTol = Math.abs(pointB - section.endTime) > 0.05;
+    var sTol = Math.abs(currentRate - (section.speed || 1)) > 0.01;
+    return aTol || bTol || sTol;
+  }
+
+  function updateSection(id) {
+    var section = sections.find(function (s) { return s.id === id; });
+    if (!section) return;
+    section.startTime = pointA;
+    section.endTime = pointB;
+    section.speed = currentRate;
+    saveSections();
+    renderSectionList();
   }
 
   // ---- Section Playlist ----
@@ -647,14 +680,33 @@
         input.addEventListener('blur', finishRename);
       });
 
+      // Dirty detection for active section
+      var isActive = activeSectionId === section.id;
+      var dirty = isActive && isSectionDirty(section);
+      var timesDirty = isActive && (Math.abs(pointA - section.startTime) > 0.05 || Math.abs(pointB - section.endTime) > 0.05);
+      var speedDirty = isActive && Math.abs(currentRate - (section.speed || 1)) > 0.01;
+
       // Times
       var timesSpan = document.createElement('span');
-      timesSpan.className = 'section-times';
-      timesSpan.textContent = formatTime(section.startTime) + ' - ' + formatTime(section.endTime);
+      timesSpan.className = 'section-times' + (timesDirty ? ' section-times-dirty' : '');
+      if (timesDirty) {
+        timesSpan.textContent = formatTime(pointA) + ' - ' + formatTime(pointB);
+      } else {
+        timesSpan.textContent = formatTime(section.startTime) + ' - ' + formatTime(section.endTime);
+      }
+
+      // Speed badge
+      var speedBadge = document.createElement('span');
+      speedBadge.className = 'section-speed' + (speedDirty ? ' section-speed-dirty' : '');
+      if (speedDirty) {
+        speedBadge.textContent = currentRate + 'x';
+      } else {
+        speedBadge.textContent = (section.speed || 1) + 'x';
+      }
 
       // Play button
       var playBtn = document.createElement('button');
-      playBtn.className = 'section-play-btn' + (activeSectionId === section.id ? ' active' : '');
+      playBtn.className = 'section-play-btn' + (isActive ? ' active' : '');
       playBtn.innerHTML = '&#9654;';
       playBtn.title = 'Play this section';
       playBtn.addEventListener('click', function () {
@@ -670,16 +722,24 @@
         deleteSection(section.id);
       });
 
-      // Speed badge
-      var speedBadge = document.createElement('span');
-      speedBadge.className = 'section-speed';
-      speedBadge.textContent = (section.speed || 1) + 'x';
-
       row.appendChild(dragHandle);
       row.appendChild(nameSpan);
       row.appendChild(timesSpan);
       row.appendChild(speedBadge);
       row.appendChild(playBtn);
+
+      // Update button (only for active section with unsaved changes)
+      if (dirty) {
+        var updateBtn = document.createElement('button');
+        updateBtn.className = 'section-update-btn';
+        updateBtn.innerHTML = '&#x21BB;';
+        updateBtn.title = 'Update section with current A/B & speed';
+        updateBtn.addEventListener('click', function () {
+          updateSection(section.id);
+        });
+        row.appendChild(updateBtn);
+      }
+
       row.appendChild(deleteBtn);
 
       // Drag events
@@ -947,8 +1007,9 @@
       urlError.textContent = '';
     });
 
-    // Play/Pause
+    // Play/Pause and Restart
     playPauseBtn.addEventListener('click', togglePlayPause);
+    restartLoopBtn.addEventListener('click', restartLoop);
 
     // Loop toggle
     loopToggleBtn.addEventListener('click', toggleLoop);

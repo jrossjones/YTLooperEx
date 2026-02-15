@@ -722,6 +722,33 @@ body {
   background: var(--accent-dim);
 }
 
+/* Section Update (dirty) Button */
+
+.section-update-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--success);
+  transition: color 0.15s, background 0.15s;
+}
+
+.section-update-btn:hover {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.section-times-dirty {
+  color: var(--success);
+}
+
+.section-speed-dirty {
+  color: #fff;
+  background: var(--success);
+}
+
 /* ---- Modal ---- */
 
 .modal {
