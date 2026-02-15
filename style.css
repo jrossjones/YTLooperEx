@@ -281,49 +281,6 @@ body {
   margin-left: 0.5rem;
 }
 
-.speed-slider {
-  width: 80px;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  background: var(--track-bg);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-}
-
-.speed-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-  transition: background 0.15s;
-}
-
-.speed-slider::-webkit-slider-thumb:hover {
-  background: var(--accent-hover);
-}
-
-.speed-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: none;
-}
-
-.speed-slider::-moz-range-track {
-  height: 6px;
-  background: var(--track-bg);
-  border-radius: 3px;
-  border: none;
-}
-
 .speed-fine-btn {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -844,8 +801,8 @@ kbd {
   .controls-bar {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 0.4rem;
+    padding: 0.4rem;
   }
 
   .controls-left,
@@ -858,6 +815,17 @@ kbd {
     flex-wrap: wrap;
   }
 
+  .speed-fine-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+  }
+
+  .speed-value-display {
+    font-size: 0.78rem;
+    min-width: 3em;
+  }
+
   .timeline-handle {
     width: 18px;
     height: 46px;
@@ -867,13 +835,31 @@ kbd {
   .timeline-controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .timeline-controls-left,
   .timeline-controls-center,
   .timeline-controls-right {
     justify-content: center;
+  }
+
+  .ab-btn {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.75rem;
+  }
+
+  .ab-time {
+    font-size: 0.7rem;
+  }
+
+  .ab-nudge-group {
+    gap: 1px;
+  }
+
+  .nudge-btn {
+    padding: 0.15rem 0.2rem;
+    font-size: 0.65rem;
   }
 
   .sections-header {
@@ -894,13 +880,42 @@ kbd {
     margin-left: 0;
     margin-top: 0.3rem;
   }
+}
 
-  .ab-nudge-group {
-    gap: 1px;
+@media (max-width: 400px) {
+  .container {
+    padding: 0.5rem 0.75rem 1.5rem;
+  }
+
+  .controls-bar {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .ab-btn {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.7rem;
+  }
+
+  .ab-time {
+    font-size: 0.65rem;
   }
 
   .nudge-btn {
-    padding: 0.15rem 0.25rem;
-    font-size: 0.7rem;
+    padding: 0.1rem 0.15rem;
+    font-size: 0.6rem;
+  }
+
+  .timeline-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .time-display {
+    font-size: 0.75rem;
+  }
+
+  .speed-btn {
+    padding: 0.2rem 0.35rem;
+    font-size: 0.72rem;
   }
 }

@@ -8,7 +8,7 @@
   // ---- Constants ----
   const POLL_INTERVAL_MS = 100;
   const STORAGE_PREFIX = 'ytlooper_sections_';
-  const DEFAULT_SPEEDS = [0.7, 0.8, 0.9, 1, 1.1];
+  const DEFAULT_SPEEDS = [0.8, 0.9, 1];
 
   // ---- State ----
   let player = null;
@@ -22,7 +22,7 @@
   // AB Loop state
   let pointA = 0;
   let pointB = 0;
-  let loopEnabled = false;
+  let loopEnabled = true;
 
   // Section playlist state
   let sections = [];
@@ -34,6 +34,9 @@
   // Available speed rates (populated from player or defaults)
   let availableRates = DEFAULT_SPEEDS;
   let currentRate = 1;
+
+  // Poll tick counter (for throttled dirty re-render)
+  let pollTick = 0;
 
   // Timeline zoom state
   let zoomStart = 0;
@@ -75,7 +78,6 @@
   const importBtn = document.getElementById('import-btn');
   const exportBtn = document.getElementById('export-btn');
   const importFileInput = document.getElementById('import-file-input');
-  const speedSlider = document.getElementById('speed-slider');
   const speedDecrementBtn = document.getElementById('speed-decrement-btn');
   const speedIncrementBtn = document.getElementById('speed-increment-btn');
   const speedValueDisplay = document.getElementById('speed-value-display');
@@ -265,6 +267,12 @@
     updatePlayhead(currentTime);
     updateTimeDisplay(currentTime);
 
+    // Throttled dirty re-render (~500ms) to catch Android touch/speed changes
+    pollTick++;
+    if (activeSectionId && pollTick % 5 === 0) {
+      renderSectionList();
+    }
+
     // AB loop enforcement
     if (loopEnabled && pointB > pointA && currentTime >= pointB) {
       player.seekTo(pointA, true);
@@ -344,7 +352,6 @@
   }
 
   function updateSpeedSlider() {
-    speedSlider.value = currentRate;
     speedValueDisplay.textContent = currentRate.toFixed(2) + 'x';
   }
 
@@ -1031,6 +1038,9 @@
     addSectionBtn.disabled = true;
     exportBtn.disabled = true;
 
+    // Enable loop toggle visual state (loopEnabled defaults to true)
+    loopToggleBtn.classList.add('active');
+
     // Load YouTube API
     loadYouTubeAPI();
 
@@ -1110,13 +1120,7 @@
       }
     });
 
-    // Speed slider
-    speedSlider.addEventListener('input', function () {
-      var rate = parseFloat(speedSlider.value);
-      rate = Math.round(rate * 100) / 100;
-      setSpeed(rate);
-    });
-
+    // Speed fine-tune buttons
     speedDecrementBtn.addEventListener('click', function () {
       changeSpeedFine(-0.05);
     });
