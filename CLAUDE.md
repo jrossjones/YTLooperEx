@@ -51,7 +51,7 @@ Then visit `http://localhost:8000`.
 - [x] Change red and green colors
 - [ ] Change AB to Set Start Set End and add shortcuts
 - [ ] Add keyboard shortcuts for everything? 
-- [ ] Investigate overlaying controls on video or replacing controls html5
+- [x] Investigate overlaying controls on video or replacing controls html5
 - [ ] Add send link
 - [ ] Add store song and playlists
 - [ ] Check out features from tux guitar

@@ -921,42 +921,18 @@ kbd {
   -webkit-user-select: none;
 }
 
-/* ---- Fullscreen Overrides ---- */
+/* ---- Overlay Toggle Button ---- */
 
-.video-wrapper:fullscreen,
-.video-wrapper:-webkit-full-screen {
-  padding-bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  border-radius: 0;
+.overlay-mode-btn.auto {
+  color: var(--info);
+  border-color: var(--info);
+  background: var(--info-dim);
 }
 
-.video-wrapper:fullscreen iframe,
-.video-wrapper:fullscreen #yt-player,
-.video-wrapper:-webkit-full-screen iframe,
-.video-wrapper:-webkit-full-screen #yt-player {
-  width: 100%;
-  height: 100%;
-}
-
-.video-wrapper:fullscreen .overlay-btn,
-.video-wrapper:-webkit-full-screen .overlay-btn {
-  min-width: 44px;
-  min-height: 44px;
-  font-size: 1.1rem;
-}
-
-.video-wrapper:fullscreen .overlay-speed-display,
-.video-wrapper:-webkit-full-screen .overlay-speed-display {
-  font-size: 1rem;
-}
-
-.video-wrapper:fullscreen .overlay-controls,
-.video-wrapper:-webkit-full-screen .overlay-controls {
-  top: 16px;
-  right: 16px;
-  padding: 8px 14px;
-  gap: 8px;
+.overlay-mode-btn.on {
+  color: #fff;
+  border-color: var(--info);
+  background: var(--info);
 }
 
 /* ---- Responsive ---- */
