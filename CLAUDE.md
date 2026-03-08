@@ -35,6 +35,7 @@ Then visit `http://localhost:8000`.
 - Section data stored in localStorage with key pattern `ytlooper_sections_{VIDEO_ID}`
 - HTML escaping required for any user-provided text rendered to DOM
 - Keyboard shortcuts are ignored when user is focused on input/textarea elements
+- **Cache busting**: When modifying `app.js` or `style.css`, always bump the `?v=N` query parameter on their `<script>`/`<link>` tags in `index.html` to avoid stale browser caches
 
 ## Key Architecture
 
