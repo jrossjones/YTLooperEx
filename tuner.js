@@ -53,33 +53,45 @@
     rms = Math.sqrt(rms / buffer.length);
     if (rms < RMS_THRESHOLD) return -1;
 
-    // Autocorrelation
+    // AMDF-style autocorrelation with two-phase peak finding
     var size = buffer.length;
     var maxSamples = Math.floor(size / 2);
-    var bestOffset = -1;
-    var bestCorrelation = 0;
-    var foundGoodCorrelation = false;
     var correlations = new Array(maxSamples);
 
+    // Phase 1: compute all correlations
     for (var offset = 0; offset < maxSamples; offset++) {
       var correlation = 0;
       for (var j = 0; j < maxSamples; j++) {
         correlation += Math.abs(buffer[j] - buffer[j + offset]);
       }
-      correlation = 1 - correlation / maxSamples;
-      correlations[offset] = correlation;
+      correlations[offset] = 1 - correlation / maxSamples;
+    }
 
-      if (correlation > 0.9 && correlation > bestCorrelation) {
-        bestCorrelation = correlation;
+    // Phase 2: skip past the trivial self-correlation peak
+    // Walk forward until similarity drops below threshold
+    var skipThreshold = 0.8;
+    var offset = 1; // start at 1 to skip trivial offset-0
+    while (offset < maxSamples && correlations[offset] > skipThreshold) {
+      offset++;
+    }
+
+    // Phase 3: find the best peak after the dip
+    var bestOffset = -1;
+    var bestCorrelation = 0;
+    var foundGoodCorrelation = false;
+
+    for (; offset < maxSamples; offset++) {
+      if (correlations[offset] > 0.9 && correlations[offset] > bestCorrelation) {
+        bestCorrelation = correlations[offset];
         bestOffset = offset;
         foundGoodCorrelation = true;
       } else if (foundGoodCorrelation) {
-        // We found a good correlation, then it dropped — we're past the peak
+        // Past the peak — stop searching
         break;
       }
     }
 
-    if (bestCorrelation < 0.8 || bestOffset === -1) return -1;
+    if (bestCorrelation < 0.8 || bestOffset <= 0) return -1;
 
     // Parabolic interpolation for sub-sample accuracy
     var shift = 0;
@@ -153,7 +165,7 @@
         scriptNode.onaudioprocess = function () {
           analyserNode.getFloatTimeDomainData(buffer);
           var freq = autoCorrelate(buffer, audioContext.sampleRate);
-          if (freq > 0) {
+          if (freq > 0 && isFinite(freq)) {
             updateDisplay(freq);
           }
         };
