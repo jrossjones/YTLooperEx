@@ -42,3 +42,25 @@ Then visit `http://localhost:8000`.
 - Timeline is a custom div-based component (not native range inputs) for cross-browser consistency
 - Section playlist supports drag-to-reorder (HTML5 Drag and Drop) and export/import as JSON
 - URL hash stores video ID for bookmarkable/shareable links
+
+## TODOs
+
+- speed up after each loop
+- Change red and green colors
+- Change AB to Set Start Set End and add shortcuts
+- Add keyboard shortcuts for everything? 
+- Investigate overlaying controls on video or replacing controls html5
+- Add send link
+- Add store song and playlists
+- Check out features from tux guitar
+- Add wasm note detection?
+- Add tuner?
+- Investigate metronome
+- Add help menu
+- Add an example demo
+- Restart particular section button
+- Second tab with warm-up coundown
+- Shifting playback speed (inconsistent)
+- Synthesized instrument instead for slow sleep playback
+- Guitarless track
+- Auto detect video sections
