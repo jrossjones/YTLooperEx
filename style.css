@@ -853,6 +853,112 @@ kbd {
   color: var(--text-primary);
 }
 
+/* ---- Video Overlay ---- */
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-overlay.visible {
+  opacity: 1;
+}
+
+.overlay-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(15, 15, 15, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius);
+  pointer-events: auto;
+}
+
+.overlay-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.overlay-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.overlay-speed-display {
+  font-size: 0.9rem;
+  color: var(--info);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2em;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---- Fullscreen Overrides ---- */
+
+.video-wrapper:fullscreen,
+.video-wrapper:-webkit-full-screen {
+  padding-bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.video-wrapper:fullscreen iframe,
+.video-wrapper:fullscreen #yt-player,
+.video-wrapper:-webkit-full-screen iframe,
+.video-wrapper:-webkit-full-screen #yt-player {
+  width: 100%;
+  height: 100%;
+}
+
+.video-wrapper:fullscreen .overlay-btn,
+.video-wrapper:-webkit-full-screen .overlay-btn {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.1rem;
+}
+
+.video-wrapper:fullscreen .overlay-speed-display,
+.video-wrapper:-webkit-full-screen .overlay-speed-display {
+  font-size: 1rem;
+}
+
+.video-wrapper:fullscreen .overlay-controls,
+.video-wrapper:-webkit-full-screen .overlay-controls {
+  top: 16px;
+  right: 16px;
+  padding: 8px 14px;
+  gap: 8px;
+}
+
 /* ---- Responsive ---- */
 
 @media (max-width: 600px) {
@@ -945,6 +1051,18 @@ kbd {
   .speed-slider-inline {
     margin-left: 0;
     margin-top: 0.3rem;
+  }
+
+  .overlay-controls {
+    top: auto;
+    bottom: 52px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .overlay-btn {
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .speed-ramp-bar {
