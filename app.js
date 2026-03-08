@@ -198,7 +198,7 @@
         controls: 1,
         modestbranding: 1,
         rel: 0,
-        fs: 0,
+        fs: 1,
         playsinline: 1,
         origin: window.location.origin
       },
