@@ -46,22 +46,28 @@ Then visit `http://localhost:8000`.
 
 ## TODOs
 
+### Simple UI
 - [x] speed up after each loop
-- [ ] Change red and green colors
+- [x] Change red and green colors
 - [ ] Change AB to Set Start Set End and add shortcuts
 - [ ] Add keyboard shortcuts for everything? 
 - [ ] Investigate overlaying controls on video or replacing controls html5
 - [ ] Add send link
 - [ ] Add store song and playlists
 - [ ] Check out features from tux guitar
-- [ ] Add wasm note detection?
-- [ ] Add tuner?
-- [ ] Investigate metronome
 - [ ] Add help menu
 - [ ] Add an example demo
 - [ ] Restart particular section button
-- [ ] Second tab with warm-up coundown
 - [ ] Shifting playback speed (inconsistent)
-- [ ] Synthesized instrument instead for slow sleep playback
+
+
+### Advanced 
+- [ ] Add wasm note detection?
+- [ ] Add tuner?
+- [ ] Investigate metronome
+- [ ] Second tab with warm-up 
+- [ ] count in
+- [ ] Synthesized instrument instead for slow speed playback
 - [ ] Guitarless track
 - [ ] Auto detect video sections
+- [ ] deploy as app or 'save to homescreen'
