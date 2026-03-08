@@ -427,6 +427,14 @@
     loopRegion.style.width = Math.min(widthPct, 100 - leftPct) + '%';
     handleA.style.left = Math.max(0, Math.min(100, leftPct)) + '%';
     handleB.style.left = Math.max(0, Math.min(100, ((pointB - viewStart) / viewDuration) * 100)) + '%';
+
+    // Toggle dirty class on handles and loop region
+    var activeSection = activeSectionId ? sections.find(function (s) { return s.id === activeSectionId; }) : null;
+    var aDirty = activeSection && Math.abs(pointA - activeSection.startTime) > 0.05;
+    var bDirty = activeSection && Math.abs(pointB - activeSection.endTime) > 0.05;
+    handleA.classList.toggle('dirty', !!aDirty);
+    handleB.classList.toggle('dirty', !!bDirty);
+    loopRegion.classList.toggle('dirty', !!(aDirty || bDirty));
   }
 
   function updateABLabels() {
