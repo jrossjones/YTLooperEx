@@ -741,21 +741,21 @@ body {
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   line-height: 1;
-  color: var(--success);
+  color: var(--accent);
   transition: color 0.15s, background 0.15s;
 }
 
 .section-update-btn:hover {
-  background: rgba(76, 175, 80, 0.15);
+  background: var(--accent-dim);
 }
 
 .section-times-dirty {
-  color: var(--success);
+  color: var(--accent);
 }
 
 .section-speed-dirty {
   color: #fff;
-  background: var(--success);
+  background: var(--accent);
 }
 
 /* ---- Modal ---- */
