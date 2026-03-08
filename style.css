@@ -18,6 +18,10 @@
   --track-bg: #2a2a3e;
   --border-color: #2a2a3e;
   --success: #4caf50;
+  --info: #26c6da;
+  --info-dim: rgba(38, 198, 218, 0.15);
+  --dirty: #ff9800;
+  --dirty-dim: rgba(255, 152, 0, 0.15);
   --radius: 8px;
   --radius-sm: 4px;
 }
@@ -689,11 +693,11 @@ body {
 
 .section-speed {
   font-size: 0.75rem;
-  color: var(--accent);
+  color: var(--info);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   padding: 0.1rem 0.3rem;
-  background: var(--accent-dim);
+  background: var(--info-dim);
   border-radius: var(--radius-sm);
 }
 
@@ -719,7 +723,7 @@ body {
 }
 
 .section-play-btn.active {
-  color: var(--accent);
+  color: var(--info);
 }
 
 .section-delete-btn {
@@ -741,21 +745,21 @@ body {
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   line-height: 1;
-  color: var(--accent);
+  color: var(--dirty);
   transition: color 0.15s, background 0.15s;
 }
 
 .section-update-btn:hover {
-  background: var(--accent-dim);
+  background: var(--dirty-dim);
 }
 
 .section-times-dirty {
-  color: var(--accent);
+  color: var(--dirty);
 }
 
 .section-speed-dirty {
   color: #fff;
-  background: var(--accent);
+  background: var(--dirty);
 }
 
 /* ---- Modal ---- */
