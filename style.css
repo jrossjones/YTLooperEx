@@ -886,6 +886,10 @@ kbd {
   pointer-events: auto;
 }
 
+.overlay-controls.disabled {
+  pointer-events: none;
+}
+
 .overlay-btn {
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.2);

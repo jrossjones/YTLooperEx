@@ -1101,17 +1101,20 @@
     if (overlayMode === 'auto') {
       overlayToggleBtn.classList.add('auto');
       overlayModeLabel.textContent = 'Auto';
+      overlayControls.classList.remove('disabled');
       // Hide overlay (will appear on next hover)
       videoOverlay.classList.remove('visible');
       if (overlayTimeout) clearTimeout(overlayTimeout);
     } else if (overlayMode === 'on') {
       overlayToggleBtn.classList.add('on');
       overlayModeLabel.textContent = 'On';
+      overlayControls.classList.remove('disabled');
       // Show overlay permanently
       videoOverlay.classList.add('visible');
       if (overlayTimeout) clearTimeout(overlayTimeout);
     } else {
       overlayModeLabel.textContent = 'Off';
+      overlayControls.classList.add('disabled');
       // Hide overlay
       videoOverlay.classList.remove('visible');
       if (overlayTimeout) clearTimeout(overlayTimeout);
