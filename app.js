@@ -49,7 +49,8 @@
   let zoomEnd = 0;
   let isZoomed = false;
 
-  // Overlay state
+  // Fullscreen & overlay state
+  let isFullscreen = false;
   let overlayMode = 'off'; // 'off' | 'auto' | 'on'
   let overlayTimeout = null;
   const OVERLAY_HIDE_DELAY_MS = 3000;
@@ -111,8 +112,12 @@
   const overlayPlayPauseBtn = document.getElementById('overlay-play-pause-btn');
   const overlayPlayIcon = document.getElementById('overlay-play-icon');
   const overlayPauseIcon = document.getElementById('overlay-pause-icon');
+  const overlayFullscreenBtn = document.getElementById('overlay-fullscreen-btn');
+  const overlayFsEnterIcon = document.getElementById('overlay-fs-enter-icon');
+  const overlayFsExitIcon = document.getElementById('overlay-fs-exit-icon');
   const overlayToggleBtn = document.getElementById('overlay-toggle-btn');
   const overlayModeLabel = document.getElementById('overlay-mode-label');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
 
   // ---- YouTube IFrame API ----
 
@@ -193,6 +198,7 @@
         controls: 1,
         modestbranding: 1,
         rel: 0,
+        fs: 0,
         playsinline: 1,
         origin: window.location.origin
       },
@@ -1044,6 +1050,10 @@
       case 'O':
         cycleOverlayMode();
         break;
+      case 'f':
+      case 'F':
+        toggleFullscreen();
+        break;
       case '?':
         toggleShortcutsModal();
         break;
@@ -1100,6 +1110,44 @@
       overlayModeLabel.textContent = 'Off';
       // Hide overlay
       videoOverlay.classList.remove('visible');
+      if (overlayTimeout) clearTimeout(overlayTimeout);
+    }
+  }
+
+  // ---- Fullscreen ----
+
+  function toggleFullscreen() {
+    if (isFullscreen) {
+      exitFullscreen();
+    } else {
+      enterFullscreen();
+    }
+  }
+
+  function enterFullscreen() {
+    if (videoWrapper.requestFullscreen) {
+      videoWrapper.requestFullscreen();
+    } else if (videoWrapper.webkitRequestFullscreen) {
+      videoWrapper.webkitRequestFullscreen();
+    }
+  }
+
+  function exitFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+
+  function onFullscreenChange() {
+    isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    overlayFsEnterIcon.style.display = isFullscreen ? 'none' : '';
+    overlayFsExitIcon.style.display = isFullscreen ? '' : 'none';
+    if (isFullscreen) {
+      showOverlay();
+    } else {
+      hideOverlay();
       if (overlayTimeout) clearTimeout(overlayTimeout);
     }
   }
@@ -1336,6 +1384,8 @@
     overlaySpeedDownBtn.addEventListener('click', function () { changeSpeedFine(-0.05); });
     overlaySpeedUpBtn.addEventListener('click', function () { changeSpeedFine(0.05); });
     overlayToggleBtn.addEventListener('click', cycleOverlayMode);
+    overlayFullscreenBtn.addEventListener('click', toggleFullscreen);
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
 
     // Overlay show/hide on mouse movement (desktop)
     videoWrapper.addEventListener('mousemove', function () {
@@ -1374,6 +1424,10 @@
     overlayControls.addEventListener('touchend', function () {
       resetOverlayTimer();
     }, { passive: true });
+
+    // Fullscreen change events
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
     // Load from URL hash if present
     loadFromHash();
