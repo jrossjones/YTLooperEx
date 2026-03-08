@@ -11,11 +11,12 @@ YouTube video looper with AB loop sections, speed control, and section playlists
 ## Project Structure
 
 ```
-index.html   — Page structure, YouTube API script loader
-style.css    — Dark theme, responsive layout, timeline/playlist styles
-app.js       — All application logic (player, looping, playlist, shortcuts)
-tuner.js     — Guitar tuner (Web Audio API, autocorrelation pitch detection)
-CLAUDE.md    — This file
+index.html       — Page structure, YouTube API script loader
+style.css        — Dark theme, responsive layout, timeline/playlist styles
+app.js           — All application logic (player, looping, playlist, shortcuts)
+tuner.js         — Guitar tuner (Web Audio API, autocorrelation pitch detection)
+tuner-notes.md   — Tuner implementation notes, limitations, and alternatives
+CLAUDE.md        — This file
 ```
 
 ## Development
@@ -63,11 +64,16 @@ Then visit `http://localhost:8000`.
 - [ ] Add an example demo
 - [ ] Restart particular section button
 - [ ] Shifting playback speed (inconsistent)
+- [ ] add light theme
+    - [ ] add color scheme customization?
 
 
 ### Advanced 
 - [ ] Add wasm note detection?
 - [x] Add tuner?
+    - [ ] add instrument selection
+    - [ ] add headstock 
+    - [ ] add waterfall display
 - [ ] Investigate metronome
 - [ ] Second tab with warm-up 
 - [ ] count in
