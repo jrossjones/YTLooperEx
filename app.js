@@ -38,6 +38,12 @@
   // Poll tick counter (for throttled dirty re-render)
   let pollTick = 0;
 
+  // Speed ramp state
+  let speedRampEnabled = false;
+  let speedRampStart = 0.80;
+  let speedRampEnd = 1.00;
+  let speedRampStep = 0.05;
+
   // Timeline zoom state
   let zoomStart = 0;
   let zoomEnd = 0;
@@ -83,6 +89,11 @@
   const speedValueDisplay = document.getElementById('speed-value-display');
   const restartLoopBtn = document.getElementById('restart-loop-btn');
   const zoomBtn = document.getElementById('zoom-btn');
+  const speedRampBar = document.getElementById('speed-ramp-bar');
+  const rampToggleBtn = document.getElementById('ramp-toggle-btn');
+  const rampStartInput = document.getElementById('ramp-start-input');
+  const rampEndInput = document.getElementById('ramp-end-input');
+  const rampStepInput = document.getElementById('ramp-step-input');
   const shortcutsBtn = document.getElementById('shortcuts-btn');
   const shortcutsModal = document.getElementById('shortcuts-modal');
   const closeModalBtn = document.getElementById('close-modal-btn');
@@ -235,6 +246,7 @@
 
   function showControls() {
     controlsBar.style.display = '';
+    speedRampBar.style.display = '';
     timelineSection.style.display = '';
     sectionsPanel.style.display = '';
     addSectionBtn.disabled = false;
@@ -275,6 +287,16 @@
 
     // AB loop enforcement
     if (loopEnabled && pointB > pointA && currentTime >= pointB) {
+      if (speedRampEnabled) {
+        var rampingUp = speedRampStart <= speedRampEnd;
+        var newRate = Math.round((currentRate + (rampingUp ? speedRampStep : -speedRampStep)) * 100) / 100;
+        if (rampingUp) {
+          newRate = Math.min(newRate, speedRampEnd);
+        } else {
+          newRate = Math.max(newRate, speedRampEnd);
+        }
+        setSpeed(newRate);
+      }
       player.seekTo(pointA, true);
     }
   }
@@ -293,6 +315,9 @@
 
   function restartLoop() {
     if (player && typeof player.seekTo === 'function') {
+      if (speedRampEnabled) {
+        setSpeed(speedRampStart);
+      }
       player.seekTo(pointA, true);
       player.playVideo();
     }
@@ -1033,6 +1058,7 @@
   function init() {
     // Initially hide player controls until a video is loaded
     controlsBar.style.display = 'none';
+    speedRampBar.style.display = 'none';
     timelineSection.style.display = 'none';
     // Sections panel stays visible so Import is always accessible
     addSectionBtn.disabled = true;
@@ -1142,6 +1168,40 @@
         }
       });
     }
+
+    // Speed ramp toggle
+    rampToggleBtn.addEventListener('click', function () {
+      speedRampEnabled = !speedRampEnabled;
+      rampToggleBtn.classList.toggle('active', speedRampEnabled);
+      if (speedRampEnabled) {
+        speedRampStart = parseFloat(rampStartInput.value) || 0.80;
+        speedRampEnd = parseFloat(rampEndInput.value) || 1.00;
+        speedRampStep = parseFloat(rampStepInput.value) || 0.05;
+        setSpeed(speedRampStart);
+      }
+    });
+
+    // Speed ramp inputs
+    rampStartInput.addEventListener('change', function () {
+      var val = parseFloat(rampStartInput.value);
+      val = Math.max(0.25, Math.min(3.0, val || 0.80));
+      rampStartInput.value = val.toFixed(2);
+      speedRampStart = val;
+    });
+
+    rampEndInput.addEventListener('change', function () {
+      var val = parseFloat(rampEndInput.value);
+      val = Math.max(0.25, Math.min(3.0, val || 1.00));
+      rampEndInput.value = val.toFixed(2);
+      speedRampEnd = val;
+    });
+
+    rampStepInput.addEventListener('change', function () {
+      var val = parseFloat(rampStepInput.value);
+      val = Math.max(0.01, Math.min(1.0, val || 0.05));
+      rampStepInput.value = val.toFixed(2);
+      speedRampStep = val;
+    });
 
     // Export / Import
     exportBtn.addEventListener('click', exportSections);

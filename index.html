@@ -78,6 +78,21 @@
       </div>
     </section>
 
+    <!-- Speed Ramp -->
+    <section class="speed-ramp-bar" id="speed-ramp-bar">
+      <button id="ramp-toggle-btn" class="control-btn ramp-toggle-btn" title="Toggle speed ramp">Ramp</button>
+      <label class="ramp-label">Start:
+        <input type="number" id="ramp-start-input" class="ramp-input" min="0.25" max="3.0" step="0.05" value="0.80">
+      </label>
+      <span class="ramp-arrow">&rarr;</span>
+      <label class="ramp-label">End:
+        <input type="number" id="ramp-end-input" class="ramp-input" min="0.25" max="3.0" step="0.05" value="1.00">
+      </label>
+      <label class="ramp-label">Step:
+        <input type="number" id="ramp-step-input" class="ramp-input" min="0.01" max="1.0" step="0.01" value="0.05">
+      </label>
+    </section>
+
     <!-- Timeline / AB Loop Selector -->
     <section class="timeline-section" id="timeline-section">
       <div class="timeline-controls">
