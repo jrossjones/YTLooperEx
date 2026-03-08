@@ -973,6 +973,160 @@ kbd {
   background: var(--info);
 }
 
+/* ---- Header Actions ---- */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ---- Guitar Tuner ---- */
+
+.tuner-content {
+  max-width: 400px;
+}
+
+.tuner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.tuner-start-btn {
+  padding: 0.6rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tuner-start-btn:hover {
+  background: var(--accent-hover);
+}
+
+.tuner-start-btn.listening {
+  background: var(--success);
+}
+
+.tuner-start-btn.listening:hover {
+  background: #66bb6a;
+}
+
+.tuner-error {
+  color: var(--accent);
+  font-size: 0.85rem;
+  min-height: 1.3em;
+  text-align: center;
+}
+
+.tuner-strings {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tuner-string {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.tuner-string.active {
+  color: var(--info);
+  border-color: var(--info);
+  background: var(--info-dim);
+}
+
+.tuner-note {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.tuner-frequency {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-gauge {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tuner-gauge-track {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  background: var(--track-bg);
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.tuner-gauge-center {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 2px;
+  height: 16px;
+  background: var(--text-muted);
+  transform: translateX(-50%);
+}
+
+.tuner-gauge-indicator {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: left 0.1s ease-out, background 0.2s;
+}
+
+.tuner-gauge-indicator.in-tune {
+  background: var(--success);
+}
+
+.tuner-gauge-indicator.close {
+  background: var(--info);
+}
+
+.tuner-gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tuner-cents {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.3em;
+}
+
 /* ---- Responsive ---- */
 
 @media (max-width: 600px) {

@@ -14,6 +14,7 @@ YouTube video looper with AB loop sections, speed control, and section playlists
 index.html   — Page structure, YouTube API script loader
 style.css    — Dark theme, responsive layout, timeline/playlist styles
 app.js       — All application logic (player, looping, playlist, shortcuts)
+tuner.js     — Guitar tuner (Web Audio API, autocorrelation pitch detection)
 CLAUDE.md    — This file
 ```
 
@@ -48,10 +49,13 @@ Then visit `http://localhost:8000`.
 
 ### Simple UI
 - [x] speed up after each loop
+    - [ ] hide controls if ramp is disabled
 - [x] Change red and green colors
 - [ ] Change AB to Set Start Set End and add shortcuts
 - [ ] Add keyboard shortcuts for everything? 
 - [x] Investigate overlaying controls on video or replacing controls html5
+    - [ ] add ramp settings to overlay
+    - [ ] add section selection to overlay
 - [ ] Add send link
 - [ ] Add store song and playlists
 - [ ] Check out features from tux guitar
@@ -63,7 +67,7 @@ Then visit `http://localhost:8000`.
 
 ### Advanced 
 - [ ] Add wasm note detection?
-- [ ] Add tuner?
+- [x] Add tuner?
 - [ ] Investigate metronome
 - [ ] Second tab with warm-up 
 - [ ] count in

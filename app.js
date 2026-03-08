@@ -1054,6 +1054,10 @@
       case 'F':
         toggleFullscreen();
         break;
+      case 't':
+      case 'T':
+        if (window.YTLooperTuner) window.YTLooperTuner.toggle();
+        break;
       case '?':
         toggleShortcutsModal();
         break;

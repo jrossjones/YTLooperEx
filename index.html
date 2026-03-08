@@ -4,18 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YTLooperEx - YouTube Video Looper</title>
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
   <!-- Header -->
   <header class="header">
     <h1 class="logo">YTLooperEx</h1>
-    <button id="shortcuts-btn" class="icon-btn" title="Keyboard shortcuts (?)">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="2" y="4" width="20" height="16" rx="2"/>
-        <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>
-      </svg>
-    </button>
+    <div class="header-actions">
+      <button id="tuner-btn" class="icon-btn" title="Guitar tuner (T)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M8 6l4-4 4 4M9 22a3 3 0 01-3-3V10h12v9a3 3 0 01-3 3H9z"/>
+        </svg>
+      </button>
+      <button id="shortcuts-btn" class="icon-btn" title="Keyboard shortcuts (?)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main class="container">
@@ -219,12 +226,51 @@
           <tr><td><kbd>R</kbd></td><td>Reset A/B to full video</td></tr>
           <tr><td><kbd>O</kbd></td><td>Cycle overlay mode (Off / Auto / On)</td></tr>
           <tr><td><kbd>F</kbd></td><td>Toggle fullscreen</td></tr>
+          <tr><td><kbd>T</kbd></td><td>Toggle guitar tuner</td></tr>
           <tr><td><kbd>?</kbd></td><td>Show / hide this help</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <script src="app.js?v=10"></script>
+  <!-- Guitar Tuner Modal -->
+  <div id="tuner-modal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-content tuner-content">
+      <div class="modal-header">
+        <h2>Guitar Tuner</h2>
+        <button id="close-tuner-btn" class="icon-btn">&times;</button>
+      </div>
+      <div class="tuner-body">
+        <button id="tuner-start-btn" class="tuner-start-btn">Start Tuner</button>
+        <p id="tuner-error" class="tuner-error"></p>
+        <div class="tuner-strings" id="tuner-strings">
+          <span class="tuner-string" data-note="E2">E2</span>
+          <span class="tuner-string" data-note="A2">A2</span>
+          <span class="tuner-string" data-note="D3">D3</span>
+          <span class="tuner-string" data-note="G3">G3</span>
+          <span class="tuner-string" data-note="B3">B3</span>
+          <span class="tuner-string" data-note="E4">E4</span>
+        </div>
+        <div class="tuner-note" id="tuner-note">--</div>
+        <div class="tuner-frequency" id="tuner-frequency">-- Hz</div>
+        <div class="tuner-gauge">
+          <div class="tuner-gauge-track">
+            <div class="tuner-gauge-center"></div>
+            <div class="tuner-gauge-indicator" id="tuner-gauge-indicator"></div>
+          </div>
+          <div class="tuner-gauge-labels">
+            <span>flat</span>
+            <span>in tune</span>
+            <span>sharp</span>
+          </div>
+          <div class="tuner-cents" id="tuner-cents"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=11"></script>
+  <script src="tuner.js?v=1"></script>
 </body>
 </html>
