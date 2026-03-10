@@ -51,12 +51,14 @@ Then visit `http://localhost:8000`.
 ### Simple UI
 - [x] speed up after each loop
     - [ ] hide controls if ramp is disabled
+    - [ ] add up/down adjustments for parameter values on mobile browser (or drag left right to adjust?)
 - [x] Change red and green colors
 - [ ] Change AB to Set Start Set End and add shortcuts
 - [ ] Add keyboard shortcuts for everything? 
 - [x] Investigate overlaying controls on video or replacing controls html5
     - [ ] add ramp settings to overlay
     - [ ] add section selection to overlay
+    - [ ] add ability to move the controls position (drag around?)
 - [ ] Add send link
 - [ ] Add store song and playlists
 - [ ] Check out features from tux guitar
@@ -66,12 +68,15 @@ Then visit `http://localhost:8000`.
 - [ ] Shifting playback speed (inconsistent)
 - [ ] add light theme
     - [ ] add color scheme customization?
+- [ ] additon of play stats?
+- [x] add license 
 
 
 ### Advanced 
 - [ ] Add wasm note detection?
 - [x] Add tuner?
     - [ ] add instrument selection
+    - [ ] add adjustment for center tuning
     - [ ] add headstock 
     - [ ] add waterfall display
 - [ ] Investigate metronome
@@ -81,3 +86,12 @@ Then visit `http://localhost:8000`.
 - [ ] Guitarless track
 - [ ] Auto detect video sections
 - [ ] deploy as app or 'save to homescreen'
+- [ ] investigate ad removal
+- [ ] voice commands to play/pause/speed up/slow down?
+
+- [ ] add music theory 
+    - [ ] key detection and subsequent chord suggestions 
+    - [ ] manual (or synthesizer aided) key selection and chord suggestions (circle 5ths?)
+    - [ ] ear trainer to select correct key  
+
+- [ ] add TDD tests
