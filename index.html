@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YTLooperEx - YouTube Video Looper</title>
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
   <!-- Header -->
@@ -184,6 +184,7 @@
       <div class="sections-header">
         <h2>Saved Sections</h2>
         <div class="sections-actions">
+          <button id="share-btn" class="small-btn" title="Copy shareable link" disabled>Share</button>
           <button id="import-btn" class="small-btn" title="Import sections from JSON">Import</button>
           <button id="export-btn" class="small-btn" title="Export sections as JSON">Export</button>
           <button id="add-section-btn" class="small-btn primary-btn">+ Add Section</button>
@@ -270,7 +271,25 @@
     </div>
   </div>
 
-  <script src="app.js?v=12"></script>
+  <!-- Share Conflict Modal -->
+  <div id="share-modal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Shared Sections</h2>
+        <button id="close-share-modal-btn" class="icon-btn">&times;</button>
+      </div>
+      <p id="share-modal-message" class="share-modal-message"></p>
+      <div class="share-modal-actions">
+        <button id="share-merge-btn" class="small-btn">Merge</button>
+        <button id="share-replace-btn" class="small-btn">Replace</button>
+        <button id="share-cancel-btn" class="small-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="lz-string.min.js"></script>
+  <script src="app.js?v=13"></script>
   <script src="tuner.js?v=2"></script>
 </body>
 </html>

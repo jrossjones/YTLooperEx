@@ -11,12 +11,13 @@ YouTube video looper with AB loop sections, speed control, and section playlists
 ## Project Structure
 
 ```
-index.html       — Page structure, YouTube API script loader
-style.css        — Dark theme, responsive layout, timeline/playlist styles
-app.js           — All application logic (player, looping, playlist, shortcuts)
-tuner.js         — Guitar tuner (Web Audio API, autocorrelation pitch detection)
-tuner-notes.md   — Tuner implementation notes, limitations, and alternatives
-CLAUDE.md        — This file
+index.html          — Page structure, YouTube API script loader
+style.css           — Dark theme, responsive layout, timeline/playlist styles
+app.js              — All application logic (player, looping, playlist, shortcuts)
+lz-string.min.js    — Vendored LZString compression library (MIT) for share links
+tuner.js            — Guitar tuner (Web Audio API, autocorrelation pitch detection)
+tuner-notes.md      — Tuner implementation notes, limitations, and alternatives
+CLAUDE.md           — This file
 ```
 
 ## Development
@@ -59,7 +60,7 @@ Then visit `http://localhost:8000`.
     - [ ] add ramp settings to overlay
     - [ ] add section selection to overlay
     - [ ] add ability to move the controls position (drag around?)
-- [ ] Add send link
+- [x] Add send link
 - [ ] Add store song and playlists
 - [ ] Check out features from tux guitar
 - [ ] Add help menu

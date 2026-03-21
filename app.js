@@ -9,6 +9,8 @@
   const POLL_INTERVAL_MS = 100;
   const STORAGE_PREFIX = 'ytlooper_sections_';
   const DEFAULT_SPEEDS = [0.8, 0.9, 1];
+  const SHARE_URL_WARN_LENGTH = 2000;
+  const TOAST_DURATION_MS = 3000;
 
   // ---- State ----
   let player = null;
@@ -54,6 +56,9 @@
   let overlayMode = 'off'; // 'off' | 'auto' | 'on'
   let overlayTimeout = null;
   const OVERLAY_HIDE_DELAY_MS = 3000;
+
+  // Share state
+  let pendingSharedSections = null;
 
   // ---- DOM References ----
   const urlInput = document.getElementById('url-input');
@@ -118,6 +123,13 @@
   const overlayToggleBtn = document.getElementById('overlay-toggle-btn');
   const overlayModeLabel = document.getElementById('overlay-mode-label');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
+  const shareBtn = document.getElementById('share-btn');
+  const shareModal = document.getElementById('share-modal');
+  const closeShareModalBtn = document.getElementById('close-share-modal-btn');
+  const shareModalMessage = document.getElementById('share-modal-message');
+  const shareMergeBtn = document.getElementById('share-merge-btn');
+  const shareReplaceBtn = document.getElementById('share-replace-btn');
+  const shareCancelBtn = document.getElementById('share-cancel-btn');
 
   // ---- YouTube IFrame API ----
 
@@ -175,6 +187,7 @@
       // onPlayerReady won't fire for loadVideoById, so load sections now
       // Duration will be picked up by the polling loop or state change handler
       loadSections();
+      processSharedSections();
       showControls();
     } else {
       createPlayer(videoId);
@@ -217,6 +230,7 @@
     renderSpeedButtons();
     resetAB();
     loadSections();
+    processSharedSections();
     showControls();
     startPolling();
   }
@@ -273,6 +287,7 @@
     sectionsPanel.style.display = '';
     addSectionBtn.disabled = false;
     exportBtn.disabled = false;
+    shareBtn.disabled = false;
   }
 
   // ---- Polling Loop ----
@@ -1169,10 +1184,224 @@
 
   function loadFromHash() {
     var hash = window.location.hash.replace('#', '').trim();
-    if (hash && extractVideoId(hash)) {
-      urlInput.value = hash;
-      loadVideo(hash);
+    if (!hash) return;
+
+    // Split on '?' to separate videoId from share params
+    var parts = hash.split('?');
+    var videoId = parts[0];
+    var params = parts[1] || '';
+
+    if (!videoId || !extractVideoId(videoId)) return;
+
+    // Parse share data if present
+    if (params) {
+      var searchParams = new URLSearchParams(params);
+      var compressedData = searchParams.get('s');
+      if (compressedData) {
+        // Clean the URL immediately so refresh doesn't re-trigger
+        history.replaceState(null, '', '#' + videoId);
+
+        try {
+          if (typeof LZString === 'undefined') {
+            urlError.textContent = 'Share link could not be loaded (compression library missing).';
+            urlInput.value = videoId;
+            loadVideo(videoId);
+            return;
+          }
+
+          var json = LZString.decompressFromEncodedURIComponent(compressedData);
+          if (!json) {
+            urlError.textContent = 'Share link data could not be decompressed.';
+            urlInput.value = videoId;
+            loadVideo(videoId);
+            return;
+          }
+
+          var compactSections = JSON.parse(json);
+          if (!Array.isArray(compactSections) || compactSections.length === 0) {
+            urlError.textContent = 'Share link contains no valid sections.';
+            urlInput.value = videoId;
+            loadVideo(videoId);
+            return;
+          }
+
+          // Validate and expand compact sections
+          var expanded = [];
+          for (var i = 0; i < compactSections.length; i++) {
+            var c = compactSections[i];
+            if (typeof c.n !== 'string' || typeof c.s !== 'number' || typeof c.e !== 'number') continue;
+            if (c.e < c.s) continue;
+            expanded.push({
+              id: 'sec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+              name: c.n,
+              startTime: c.s,
+              endTime: c.e,
+              speed: typeof c.p === 'number' ? c.p : 1
+            });
+          }
+
+          if (expanded.length === 0) {
+            urlError.textContent = 'Share link contains no valid sections.';
+            urlInput.value = videoId;
+            loadVideo(videoId);
+            return;
+          }
+
+          pendingSharedSections = expanded;
+        } catch (err) {
+          urlError.textContent = 'Could not parse shared sections from URL.';
+        }
+      }
     }
+
+    urlInput.value = videoId;
+    loadVideo(videoId);
+  }
+
+  // ---- Share Link Generation ----
+
+  function buildCompactSections() {
+    return sections.map(function (s) {
+      var compact = {
+        n: s.name,
+        s: Math.round(s.startTime * 1000) / 1000,
+        e: Math.round(s.endTime * 1000) / 1000
+      };
+      if (typeof s.speed === 'number' && s.speed !== 1) {
+        compact.p = Math.round(s.speed * 1000) / 1000;
+      }
+      return compact;
+    });
+  }
+
+  function generateShareURL() {
+    if (!currentVideoId || sections.length === 0) return null;
+    var compact = buildCompactSections();
+    var json = JSON.stringify(compact);
+    var compressed = LZString.compressToEncodedURIComponent(json);
+    var url = window.location.origin + window.location.pathname + '#' + currentVideoId + '?s=' + compressed;
+    return url;
+  }
+
+  function shareLink() {
+    if (!currentVideoId || sections.length === 0) {
+      showToast('No sections to share');
+      return;
+    }
+    if (typeof LZString === 'undefined') {
+      showToast('Share unavailable (compression library missing)', 'warning');
+      return;
+    }
+    var url = generateShareURL();
+    if (!url) return;
+
+    if (url.length > SHARE_URL_WARN_LENGTH) {
+      showToast('Link copied! Warning: URL is very long (' + url.length + ' chars) and may not work in all browsers.', 'warning');
+    } else {
+      showToast('Share link copied to clipboard!');
+    }
+    copyToClipboard(url);
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(function () {
+        fallbackCopyToClipboard(text);
+      });
+    } else {
+      fallbackCopyToClipboard(text);
+    }
+  }
+
+  function fallbackCopyToClipboard(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      // silent fail
+    }
+    document.body.removeChild(textarea);
+  }
+
+  function showToast(message, type) {
+    // Remove any existing toast
+    var existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.className = 'toast' + (type ? ' ' + type : '');
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger reflow for transition
+    toast.offsetHeight;
+    toast.classList.add('visible');
+
+    setTimeout(function () {
+      toast.classList.remove('visible');
+      setTimeout(function () {
+        if (toast.parentNode) toast.remove();
+      }, 300);
+    }, TOAST_DURATION_MS);
+  }
+
+  // ---- Share Conflict Resolution ----
+
+  function processSharedSections() {
+    if (!pendingSharedSections) return;
+    var incoming = pendingSharedSections;
+    pendingSharedSections = null;
+
+    if (sections.length === 0) {
+      // No existing sections — load directly
+      sections = incoming;
+      saveSections();
+      renderSectionList();
+      return;
+    }
+
+    // Conflict — show modal
+    shareModalMessage.textContent = 'This video already has ' + sections.length +
+      ' saved section' + (sections.length !== 1 ? 's' : '') +
+      '. The shared link contains ' + incoming.length +
+      ' section' + (incoming.length !== 1 ? 's' : '') +
+      '. How would you like to proceed?';
+    // Store incoming on modal for handler access
+    shareModal._pendingSections = incoming;
+    shareModal.hidden = false;
+  }
+
+  function mergeSharedSections(incoming) {
+    incoming.forEach(function (imported) {
+      var exists = sections.some(function (existing) {
+        return existing.name === imported.name &&
+          Math.abs(existing.startTime - imported.startTime) < 0.5 &&
+          Math.abs(existing.endTime - imported.endTime) < 0.5;
+      });
+      if (!exists) {
+        sections.push(imported);
+      }
+    });
+    saveSections();
+    renderSectionList();
+    shareModal.hidden = true;
+  }
+
+  function replaceWithSharedSections(incoming) {
+    sections = incoming;
+    activeSectionId = null;
+    saveSections();
+    renderSectionList();
+    shareModal.hidden = true;
+  }
+
+  function cancelSharedSections() {
+    shareModal.hidden = true;
   }
 
   // ---- Utility ----
@@ -1205,6 +1434,7 @@
     // Sections panel stays visible so Import is always accessible
     addSectionBtn.disabled = true;
     exportBtn.disabled = true;
+    shareBtn.disabled = true;
 
     // Enable loop toggle visual state (loopEnabled defaults to true)
     loopToggleBtn.classList.add('active');
@@ -1357,6 +1587,35 @@
       }
     });
 
+    // Share button
+    shareBtn.addEventListener('click', shareLink);
+
+    // Share modal buttons
+    shareMergeBtn.addEventListener('click', function () {
+      if (shareModal._pendingSections) {
+        mergeSharedSections(shareModal._pendingSections);
+        shareModal._pendingSections = null;
+      }
+    });
+    shareReplaceBtn.addEventListener('click', function () {
+      if (shareModal._pendingSections) {
+        replaceWithSharedSections(shareModal._pendingSections);
+        shareModal._pendingSections = null;
+      }
+    });
+    shareCancelBtn.addEventListener('click', function () {
+      shareModal._pendingSections = null;
+      cancelSharedSections();
+    });
+    closeShareModalBtn.addEventListener('click', function () {
+      shareModal._pendingSections = null;
+      cancelSharedSections();
+    });
+    shareModal.querySelector('.modal-backdrop').addEventListener('click', function () {
+      shareModal._pendingSections = null;
+      cancelSharedSections();
+    });
+
     // Shortcuts modal
     shortcutsBtn.addEventListener('click', toggleShortcutsModal);
     closeModalBtn.addEventListener('click', function () {
@@ -1366,10 +1625,16 @@
     shortcutsModal.querySelector('.modal-backdrop').addEventListener('click', function () {
       shortcutsModal.hidden = true;
     });
-    // Close modal on Escape
+    // Close modals on Escape
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !shortcutsModal.hidden) {
-        shortcutsModal.hidden = true;
+      if (e.key === 'Escape') {
+        if (!shortcutsModal.hidden) {
+          shortcutsModal.hidden = true;
+        }
+        if (!shareModal.hidden) {
+          shareModal._pendingSections = null;
+          cancelSharedSections();
+        }
       }
     });
 

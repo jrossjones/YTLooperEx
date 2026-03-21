@@ -853,6 +853,52 @@ kbd {
   color: var(--text-primary);
 }
 
+/* ---- Share Modal ---- */
+
+.share-modal-message {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.share-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ---- Toast Notification ---- */
+
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.toast.warning {
+  border-color: var(--dirty);
+  color: var(--dirty);
+}
+
 /* ---- Video Overlay ---- */
 
 .video-overlay {
