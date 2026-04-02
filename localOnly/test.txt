@@ -1,2 +1,3 @@
 test1 git config --local branch.localOnly.pushRemote no-push
 test2 git config --local branch.localOnly.pushRemote ""
+test3 hook added to hooks/pre-push 
