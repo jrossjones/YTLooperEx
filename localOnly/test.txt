@@ -1,0 +1,1 @@
+test1 git config --local branch.localOnly.pushRemote no-push
